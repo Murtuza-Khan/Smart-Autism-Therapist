@@ -1,0 +1,45 @@
+# name: Gh-Pages
+
+# on:
+#   push:
+#     branches: [master]
+
+# jobs:
+#   build:
+#     runs-on: ubuntu-latest
+
+#     steps:
+#       - uses: actions/checkout@v2
+#       - uses: subosito/flutter-action@v1
+#       - uses: erickzanardo/flutter-gh-pages@v3
+name: Build and Release APK
+on: push
+jobs:
+    hosting:
+      name: Deploy Website
+      runs-on: ubuntu-latest
+      steps:
+        # Checkout Repository
+        - uses: actions/checkout@v1
+
+        # Install Flutter command
+        - uses: subosito/flutter-action@v1
+          with:
+            channel: 'dev'
+
+        # Build Website
+        - name: Build Website
+          run: |
+            flutter config --enable-web
+            flutter pub get
+            flutter build web --release
+          working-directory: ./
+
+        # Deploy Firebase Hosting
+        - name: Deploy Firebase Hosting
+          uses: w9jds/firebase-action@master
+          with:
+            args: deploy --only hosting:smart-autism-therapist-54615.firebaseapp.com
+          env:
+            FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+            PROJECT_PATH: ./
